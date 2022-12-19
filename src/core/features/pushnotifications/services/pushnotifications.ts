@@ -96,6 +96,7 @@ export class CorePushNotificationsProvider {
         // Now register the device to receive push notifications. Don't block for this.
         this.registerDevice();
 
+
         CoreEvents.on(CoreEvents.NOTIFICATION_SOUND_CHANGED, () => {
             // Notification sound has changed, register the device again to update the sound setting.
             this.registerDevice();
@@ -661,7 +662,10 @@ export class CorePushNotificationsProvider {
             // Check if sound is enabled for notifications.
             const options = await this.getOptions();
 
+            this.logger.debug("Push INIT!");
             const pushObject = Push.init(options);
+
+            this.logger.debug(await Push.getPublicKey());
 
             pushObject.on('notification').subscribe((notification: NotificationEventResponse | {registrationType: string}) => {
                 // Execute the callback in the Angular zone, so change detection doesn't stop working.
@@ -713,6 +717,8 @@ export class CorePushNotificationsProvider {
     async registerDeviceOnMoodle(siteId?: string, forceUnregister?: boolean): Promise<void> {
         this.logger.debug('Register device on Moodle.');
 
+        this.registerPublicKeyOnMoodle();
+
         if (!this.canRegisterOnMoodle()) {
             return Promise.reject(null);
         }
@@ -750,6 +756,25 @@ export class CorePushNotificationsProvider {
             // Remove pending unregisters for this site.
             await CoreUtils.ignoreErrors(this.pendingUnregistersTable.deleteByPrimaryKey({ siteid: site.getId() }));
         }
+    }
+
+    async registerPublicKeyOnMoodle() {
+        this.logger.debug('Register public key on Moodle.');
+
+        const site = await CoreSites.getSite();
+
+        const data: CoreUserAddUserDevicePublicKeyWSParams = {
+            uuid: Device.uuid,
+            publickey: await Push.getPublicKey()
+        };
+
+        this.logger.debug("public key data: " + data);
+
+        const response = await site.write<CoreUserAddUserDevicePublicKeyWSResponse>(
+            'core_user_add_user_device_public_key',
+            data,
+        );
+        this.logger.debug("Public key: " + response);
     }
 
     /**
@@ -936,3 +961,16 @@ export type CoreUserAddUserDeviceWSParams = {
  * Data returned by core_user_add_user_device WS.
  */
 export type CoreUserAddUserDeviceWSResponse = CoreWSExternalWarning[][];
+
+/**
+ * Params of core_user_add_user_device_key WS.
+ */
+export type CoreUserAddUserDevicePublicKeyWSParams = {
+    uuid: string;
+    publickey: string;
+};
+
+/**
+ * Data returned by core_user_add_user_device_key WS.
+ */
+export type CoreUserAddUserDevicePublicKeyWSResponse = CoreWSExternalWarning[][];

@@ -662,10 +662,7 @@ export class CorePushNotificationsProvider {
             // Check if sound is enabled for notifications.
             const options = await this.getOptions();
 
-            this.logger.debug("Push INIT!");
             const pushObject = Push.init(options);
-
-            this.logger.debug(await Push.getPublicKey());
 
             pushObject.on('notification').subscribe((notification: NotificationEventResponse | {registrationType: string}) => {
                 // Execute the callback in the Angular zone, so change detection doesn't stop working.
@@ -763,18 +760,20 @@ export class CorePushNotificationsProvider {
 
         const site = await CoreSites.getSite();
 
+        let publicKey = await Push.getPublicKey();
+        if (publicKey == null) {
+            throw new CoreError('Cannot get app public key.');
+        }
+
         const data: CoreUserAddUserDevicePublicKeyWSParams = {
             uuid: Device.uuid,
-            publickey: await Push.getPublicKey()
+            publickey: publicKey
         };
 
-        this.logger.debug("public key data: " + data);
-
-        const response = await site.write<CoreUserAddUserDevicePublicKeyWSResponse>(
+        await site.write<CoreUserAddUserDevicePublicKeyWSResponse>(
             'core_user_add_user_device_public_key',
             data,
         );
-        this.logger.debug("Public key: " + response);
     }
 
     /**

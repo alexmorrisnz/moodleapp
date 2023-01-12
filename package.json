@@ -66,7 +66,7 @@
     "@ionic-native/media": "5.36.0",
     "@ionic-native/media-capture": "5.36.0",
     "@ionic-native/network": "5.36.0",
-    "@ionic-native/push": "5.36.0",
+    "@moodlehq/push": "git+https://github.com/alexmorrisnz/push-wrapper.git",
     "@ionic-native/qr-scanner": "5.36.0",
     "@ionic-native/splash-screen": "5.36.0",
     "@ionic-native/sqlite": "5.36.0",

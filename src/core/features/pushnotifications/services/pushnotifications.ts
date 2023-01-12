@@ -14,7 +14,7 @@
 
 import { Injectable } from '@angular/core';
 import { ILocalNotification } from '@ionic-native/local-notifications';
-import { NotificationEventResponse, PushOptions, RegistrationEventResponse } from '@ionic-native/push/ngx';
+import { NotificationEventResponse, PushOptions, RegistrationEventResponse } from '@moodlehq/push/ngx';
 
 import { CoreApp } from '@services/app';
 import { CoreSites } from '@services/sites';
